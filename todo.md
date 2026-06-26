@@ -1,18 +1,18 @@
 # Build checklist
 
 ## Phase 0 — Foundation
-- [ ] Install Ollama + pull models (`ollama pull llama3.1:8b && ollama pull nomic-embed-text`)
-- [ ] Set up Supabase project (collect API keys, DB URL, enable email auth)
-- [ ] Configure `backend/.env` from `.env.example`
-- [ ] Configure `frontend/.env` from `.env.example`
+- [x] Install Ollama + pull models (`ollama pull llama3.1:8b && ollama pull nomic-embed-text`)
+- [x] Set up Supabase project (collect API keys, DB URL, enable email auth)
+- [x] Configure `backend/.env` from `.env.example`
+- [x] Configure `frontend/.env` from `.env.example`
 
 ## Phase 1 — Backend scaffold
-- [ ] `backend/`: add deps (`uv add fastapi uvicorn pydantic pydantic-settings httpx structlog openai supabase pydantic-ai sqlalchemy alembic psycopg[binary] pgvector`)
-- [ ] `backend/app/main.py` — FastAPI entrypoint
-- [ ] `backend/app/config.py` — Pydantic settings (single source of truth for env)
-- [ ] `backend/app/database/models.py` — SQLAlchemy models
-- [ ] `backend/app/database/supabase.py` — Supabase client wrapper
-- [ ] Alembic init + config (`alembic init alembic`, wire to `config.py`)
+- [x] `backend/`: add deps (`uv add fastapi uvicorn pydantic pydantic-settings httpx structlog openai supabase pydantic-ai sqlalchemy alembic psycopg[binary] pgvector`)
+- [x] `backend/app/main.py` — FastAPI entrypoint
+- [x] `backend/app/config.py` — Pydantic settings (single source of truth for env)
+- [x] `backend/app/database/models.py` — SQLAlchemy models
+- [x] `backend/app/database/supabase.py` — Supabase client wrapper
+- [x] Alembic init + config (`alembic init alembic`, wire to `config.py`)
 - [ ] Initial migration (pgvector, source_documents, document_chunks, chat tables)
 
 ## Phase 2 — Auth
