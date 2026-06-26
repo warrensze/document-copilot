@@ -1,0 +1,15 @@
+{
+  "name": "opencode-sandbox",
+  "build": { "dockerfile": "Dockerfile", "context": ".." },
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind",
+  "workspaceFolder": "/workspace",
+  "runArgs": [
+    "--read-only",
+    "--cap-drop=ALL",
+    "--security-opt=no-new-privileges",
+    "--tmpfs=/tmp:noexec,nosuid,size=128m"
+  ],
+  "customizations": {
+    "vscode": { "extensions": ["ms-python.python"] }
+  }
+}
