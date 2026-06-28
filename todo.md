@@ -13,7 +13,7 @@
 - [x] `backend/app/database/models.py` — SQLAlchemy models
 - [x] `backend/app/database/supabase.py` — Supabase client wrapper
 - [x] Alembic init + config (`alembic init alembic`, wire to `config.py`)
-- [ ] Initial migration (pgvector, source_documents, document_chunks, chat tables)
+- [x] Initial migration (pgvector, source_documents, document_chunks, chat tables)
 
 ## Phase 2 — Auth
 - [ ] `backend/app/auth/dependencies.py` — JWT verification + current user dependency

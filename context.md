@@ -34,4 +34,5 @@ Greenfield/scaffolding. Backend and frontend are empty shells (config only).
 - Switched from OpenAI to Ollama (local AI) across all docs, config, and plans. Models: `llama3.1:8b` (LLM) + `nomic-embed-text` (embeddings, 768d).
 - Initialized git repo.
 - Installed backend deps: fastapi, uvicorn, pydantic, pydantic-settings, httpx, structlog, openai, supabase, pydantic-ai, sqlalchemy, alembic, psycopg[binary], pgvector (168 packages).
-- Scaffolded backend Phase 1: config.py, main.py, database/models.py, database/supabase.py, Alembic init. All imports verified. Health endpoint returns 200.
+- Scaffolded backend Phase 1: config.py, main.py, database/models/, database/supabase.py, Alembic init. All imports verified. Health endpoint returns 200.
+- Ran initial Alembic migration — 6 tables created in Supabase (users, source_documents, document_chunks, chat_threads, chat_messages, message_citations).

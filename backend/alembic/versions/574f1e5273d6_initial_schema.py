@@ -91,7 +91,7 @@ def upgrade() -> None:
     op.create_index("idx_chat_messages_thread_id", "chat_messages", ["thread_id"])
     op.create_index("idx_message_citations_message_id", "message_citations", ["message_id"])
     op.create_index("idx_message_citations_chunk_id", "message_citations", ["chunk_id"])
-    op.create_index("idx_document_chunks_embedding", "document_chunks", ["embedding"], postgresql_using="hnsw", postgresql_with={"m": 16, "ef_construction": 200})
+    op.create_index("idx_document_chunks_embedding", "document_chunks", ["embedding"], postgresql_using="hnsw", postgresql_with={"m": 16, "ef_construction": 200}, postgresql_ops={"embedding": "vector_cosine_ops"})
     op.execute("CREATE INDEX idx_document_chunks_search ON document_chunks USING GIN (search_vector)")
     op.execute("CREATE INDEX idx_document_chunks_meta ON document_chunks USING GIN (meta jsonb_path_ops)")
 
