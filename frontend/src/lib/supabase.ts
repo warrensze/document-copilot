@@ -3,3 +3,8 @@ import { createClient } from "@supabase/supabase-js"
 import { SUPABASE_ANON_KEY, SUPABASE_URL } from "@/lib/env"
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+
+export async function getAccessToken(): Promise<string | null> {
+  const { data } = await supabase.auth.getSession()
+  return data.session?.access_token ?? null
+}

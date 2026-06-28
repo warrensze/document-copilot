@@ -1,4 +1,4 @@
-import { supabase } from "@/lib/supabase"
+import { getAccessToken } from "@/lib/supabase"
 
 export class ApiError extends Error {
   status: number
@@ -10,11 +10,6 @@ export class ApiError extends Error {
     this.status = status
     this.isNetworkError = isNetworkError
   }
-}
-
-async function getAccessToken(): Promise<string | null> {
-  const { data } = await supabase.auth.getSession()
-  return data.session?.access_token ?? null
 }
 
 async function request<T>(
