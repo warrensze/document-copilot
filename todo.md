@@ -16,17 +16,27 @@
 - [x] Initial migration (pgvector, source_documents, document_chunks, chat tables)
 
 ## Phase 2 — Auth
-- [ ] `backend/app/auth/dependencies.py` — JWT verification + current user dependency
-- [ ] Frontend: scaffold Vite + React SPA (`pnpm create vite`, add deps)
-- [ ] `frontend/src/lib/env.ts` — env validation module
-- [ ] `frontend/src/lib/supabase.ts` — Supabase browser client
-- [ ] Supabase email auth UI (login/signup pages)
+- [x] `backend/app/auth/dependencies.py` — JWT verification + current user dependency
+- [x] Frontend: scaffold Vite + React SPA (`pnpm create vite`, add deps)
+- [x] Frontend: Tailwind CSS v4 + `@tailwindcss/vite` wired
+- [x] Frontend: path alias (`@/` → `./src`) configured
+- [x] Frontend: shadcn/ui initialized + deps installed
+- [x] `frontend/src/lib/env.ts` — env validation module
+- [x] `frontend/src/lib/supabase.ts` — Supabase browser client
+- [x] `frontend/src/lib/http.ts` — fetch wrapper with bearer token injection
+- [x] `frontend/src/lib/api.ts` — typed API methods
+- [x] Supabase email auth UI (login/signup pages)
+- [x] `frontend/src/lib/auth.tsx` — AuthContext + provider
 
 ## Phase 3 — Frontend API client + stub chat
-- [ ] `frontend/src/lib/http.ts` — fetch wrapper with bearer token injection
-- [ ] `frontend/src/lib/api.ts` — typed API methods
+- [x] `frontend/src/lib/http.ts` — fetch wrapper with bearer token injection
+- [x] `frontend/src/lib/api.ts` — typed API methods
+- [ ] Install Vercel AI SDK (`ai` + `@ai-sdk/react`)
 - [ ] `backend/app/api/chat.py` — POST `/chat/stream` (stubbed)
-- [ ] Frontend chat UI with AI SDK (`useChat` stub, message rendering)
+- [ ] `frontend/src/pages/Chat.tsx` — chat page with `useChat`
+- [ ] `frontend/src/components/chat/MessageList.tsx` — message rendering
+- [ ] `frontend/src/components/chat/ChatInput.tsx` — input + send
+- [ ] Wire `/chat` route in App.tsx
 
 ## Phase 4 — Ingestion pipeline
 - [ ] `backend/ingest/` — Markdown extraction from downloaded filings
