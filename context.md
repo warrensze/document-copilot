@@ -4,7 +4,7 @@
 **Document Copilot** — internal AI chatbot for Driftwood Capital analysts. Query SEC filings in natural language, get grounded citable answers.
 
 ## State
-Phase 2 complete. Backend scaffolded, database live, frontend scaffolded, auth working end-to-end.
+Phase 3 (stub chat) complete. Backend streaming endpoint + frontend chat UI wired. Analyst can log in, start a new chat, send a message, and see a streaming response from Ollama. Retrieval, grounding, persistence deferred.
 
 ## Stack
 - **Backend:** Python 3.12+, FastAPI, Pydantic v2, PydanticAI, httpx, structlog, SQLAlchemy, Alembic, Supabase Python client, OpenAI SDK (pointed at Ollama)
@@ -18,28 +18,34 @@ Phase 2 complete. Backend scaffolded, database live, frontend scaffolded, auth w
 ## Repo layout
 ```
 /workspaces/Projects/GenAIFullStackDemoProject/document-copilot/
-├── backend/          # FastAPI service
+├── backend/
 │   ├── app/
-│   │   ├── main.py           # FastAPI entrypoint + /health
-│   │   ├── config.py         # Pydantic settings
+│   │   ├── main.py              # FastAPI + /health + chat router
+│   │   ├── config.py            # Pydantic settings
+│   │   ├── api/
+│   │   │   ├── __init__.py
+│   │   │   └── chat.py          # POST /chat/stream (SSE, Ollama stub)
 │   │   ├── auth/
 │   │   │   └── dependencies.py  # JWT verification
 │   │   └── database/
-│   │       ├── models/       # 6 table models (split by file)
-│   │       └── supabase.py   # client factories
-│   ├── alembic/              # migrations
+│   │       ├── models/          # 6 table models
+│   │       └── supabase.py      # client factories
+│   ├── alembic/
 │   └── alembic.ini
-├── frontend/         # React SPA
+├── frontend/
 │   ├── src/
-│   │   ├── lib/     # env, supabase, http, api, auth
-│   │   ├── pages/   # Login, SignUp
-│   │   ├── components/ui/  # shadcn button
-│   │   ├── App.tsx  # router
-│   │   └── main.tsx # BrowserRouter + AuthProvider
+│   │   ├── lib/        # env, supabase, http, api, auth
+│   │   ├── pages/      # Chat, Login, SignUp
+│   │   ├── components/
+│   │   │   ├── ui/     # shadcn button
+│   │   │   └── chat/   # Sidebar, MessageList, ChatInput
+│   │   ├── App.tsx     # router with /chat
+│   │   └── main.tsx
+│   ├── tsconfig.app.json
 │   ├── components.json
 │   └── vite.config.ts
-├── data/             # 25 SEC 10-K filings downloaded
-├── docs/             # architecture spec, client brief, setup guides
+├── data/               # 25 SEC 10-K filings
+├── docs/               # architecture, plans, guides, client brief
 ├── AGENTS.md
 ├── context.md
 ├── prompts.md
@@ -60,3 +66,7 @@ Phase 2 complete. Backend scaffolded, database live, frontend scaffolded, auth w
 - Created test user via admin API: test@driftwood.com / test123456.
 - Auth flow verified end-to-end (login -> redirects to "/" -> shows "Signed in as test@driftwood.com").
 - Accidental: installed `ai` 7.0.3 + `@ai-sdk/react` 4.0.4 during this session (was not asked to start Phase 3).
+- Phase 3 backend: created `api/chat.py` with `POST /chat/stream` — receives AI SDK v4 wire format (`id`, `messages`, `trigger`, `messageId`), streams Ollama response as SSE `text-start`/`text-delta`/`text-end` events, protected by `get_current_user`. Verified server starts and returns 401 without auth.
+- Phase 3 frontend: `getAccessToken` exported from `supabase.ts` and shared with `http.ts`. Created `Chat.tsx` (useChat + DefaultChatTransport + auth guard), `MessageList.tsx` (bubbles, auto-scroll, empty state, streaming cursor), `ChatInput.tsx` (form + send on Enter), `Sidebar.tsx` (app branding, new chat button, sign out). Wired `/chat` route in `App.tsx`. Both `tsc --noEmit` and `pnpm build` pass clean.
+- Fixed `tsconfig.app.json` — added `ignoreDeprecations: "6.0"` for TypeScript 6 `baseUrl` deprecation in build mode.
+- Created `docs/phase-3-plan.md` and `docs/phase-3-frontend-plan.md` during planning.
