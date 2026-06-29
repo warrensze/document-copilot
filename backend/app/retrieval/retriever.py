@@ -5,6 +5,7 @@ import logging
 import psycopg
 from openai import OpenAI
 
+from app.config import settings
 from app.retrieval.fusion import reciprocal_rank_fusion
 from app.retrieval.queries import SearchResult, fulltext_search, semantic_search
 

@@ -55,12 +55,12 @@
 - [x] `backend/tests/retrieval/test_fusion.py` — unit tests for RRF, edge cases (empty, disjoint, overlapping)
 
 ## Phase 6 — LLM assistant (`backend/app/assistant/`)
-- [ ] `backend/app/assistant/__init__.py`
-- [ ] `backend/app/assistant/outputs.py` — `GroundedAnswer`, `Citation`, `SourcePassage` Pydantic models
-- [ ] `backend/app/assistant/deps.py` — `DocumentAgentDeps` dataclass (user_id, thread_id, retriever)
-- [ ] `backend/app/assistant/instructions.md` — system prompt with product contract
-- [ ] `backend/app/assistant/agent.py` — PydanticAI `Agent[DocumentAgentDeps, GroundedAnswer]` + `run_agent()`
-- [ ] `backend/tests/assistant/test_agent.py` — unit tests (tool schema, deps construction, instructions loaded)
+- [x] `backend/app/assistant/__init__.py`
+- [x] `backend/app/assistant/outputs.py` — `GroundedAnswer`, `Citation`, `SourcePassage` Pydantic models
+- [x] `backend/app/assistant/deps.py` — `DocumentAgentDeps` dataclass (user_id, thread_id, retriever)
+- [x] `backend/app/assistant/instructions.md` — system prompt with product contract
+- [x] `backend/app/assistant/agent.py` — PydanticAI `Agent[DocumentAgentDeps, GroundedAnswer]` + `run_agent()`
+- [x] `backend/tests/assistant/test_agent.py` — unit tests (tool schema, deps construction, instructions loaded)
 
 ## Phase 7 — Grounding (`backend/app/grounding/`)
 - [ ] `backend/app/grounding/__init__.py`
