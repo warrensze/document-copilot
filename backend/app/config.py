@@ -16,6 +16,11 @@ class Settings(BaseSettings):
     embedding_model: str = "nomic-embed-text"
     embedding_dimensions: int = 768
 
+    # --- Retrieval ---
+    retrieval_top_k: int = 15
+    retrieval_inner_top_k: int = 20
+    retrieval_rrf_k: int = 60
+
     allowed_origins: str = "http://localhost:5173"
 
 

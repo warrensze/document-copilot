@@ -4,6 +4,8 @@ from dataclasses import dataclass
 
 from psycopg import Connection
 
+from app.config import settings
+
 
 @dataclass
 class SearchResult:
@@ -56,8 +58,9 @@ def _vec_str(embedding: list[float]) -> str:
 def semantic_search(
     conn: Connection,
     embedding: list[float],
-    top_k: int = 20,
+    top_k: int | None = None,
 ) -> list[SearchResult]:
+    top_k = top_k or settings.retrieval_inner_top_k
     vec = _vec_str(embedding)
     rows = conn.execute(SEMANTIC_SQL, (vec, vec, top_k)).fetchall()
     return [_row_to_result(r) for r in rows]
@@ -66,8 +69,9 @@ def semantic_search(
 def fulltext_search(
     conn: Connection,
     query: str,
-    top_k: int = 20,
+    top_k: int | None = None,
 ) -> list[SearchResult]:
+    top_k = top_k or settings.retrieval_inner_top_k
     rows = conn.execute(FULLTEXT_SQL, (query, query, top_k)).fetchall()
     return [_row_to_result(r) for r in rows]
 

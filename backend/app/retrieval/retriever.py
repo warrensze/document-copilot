@@ -17,8 +17,9 @@ class DocumentRetriever:
         self._db_url = db_url
         self._ollama_client = ollama_client
 
-    def search(self, query: str, top_k: int = 15) -> list[SearchResult]:
-        inner_top_k = max(top_k * 2, 20)
+    def search(self, query: str, top_k: int | None = None) -> list[SearchResult]:
+        top_k = top_k or settings.retrieval_top_k
+        inner_top_k = max(top_k * 2, settings.retrieval_inner_top_k)
 
         embedding = self._embed_query(query)
 

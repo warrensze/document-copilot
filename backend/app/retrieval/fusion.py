@@ -2,15 +2,18 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 
+from app.config import settings
 from app.retrieval.queries import SearchResult
 
 
 def reciprocal_rank_fusion(
     semantic: Sequence[SearchResult],
     fulltext: Sequence[SearchResult],
-    top_k: int = 15,
-    k: int = 60,
+    top_k: int | None = None,
+    k: int | None = None,
 ) -> list[SearchResult]:
+    top_k = top_k or settings.retrieval_top_k
+    k = k or settings.retrieval_rrf_k
     fused: dict[str, float] = {}
     seen: dict[str, SearchResult] = {}
 
