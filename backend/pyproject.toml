@@ -33,4 +33,5 @@ exclude-newer = "7 days"
 dev = [
     "docling==2.104.0",
     "ipykernel==7.3.0",
+    "pytest==8.3.5",
 ]

@@ -47,12 +47,12 @@
 - [x] Full batch: 25 filings, 22,209 chunks, all embedded + search_vector populated
 
 ## Phase 5 — Retrieval (`backend/app/retrieval/`)
-- [ ] `backend/app/retrieval/__init__.py`
-- [ ] `backend/app/retrieval/queries.py` — pgvector semantic search (`<=>` cosine distance)
-- [ ] `backend/app/retrieval/queries.py` — Postgres full-text search (`plainto_tsquery` + `ts_rank`)
-- [ ] `backend/app/retrieval/fusion.py` — Reciprocal Rank Fusion (`score = 1 / (k + rank)`)
-- [ ] `backend/app/retrieval/retriever.py` — `DocumentRetriever` (embed query → run both searches → fuse → return `SourcePassage`s)
-- [ ] `backend/tests/retrieval/test_fusion.py` — unit tests for RRF, edge cases (empty, disjoint, overlapping)
+- [x] `backend/app/retrieval/__init__.py`
+- [x] `backend/app/retrieval/queries.py` — pgvector semantic search (`<=>` cosine distance)
+- [x] `backend/app/retrieval/queries.py` — Postgres full-text search (`plainto_tsquery` + `ts_rank`)
+- [x] `backend/app/retrieval/fusion.py` — Reciprocal Rank Fusion (`score = 1 / (k + rank)`)
+- [x] `backend/app/retrieval/retriever.py` — `DocumentRetriever` (embed query → run both searches → fuse → return `SearchResult`s)
+- [x] `backend/tests/retrieval/test_fusion.py` — unit tests for RRF, edge cases (empty, disjoint, overlapping)
 
 ## Phase 6 — LLM assistant (`backend/app/assistant/`)
 - [ ] `backend/app/assistant/__init__.py`
