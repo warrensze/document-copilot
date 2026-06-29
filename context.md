@@ -4,7 +4,7 @@
 **Document Copilot** — internal AI chatbot for Driftwood Capital analysts. Query SEC filings in natural language, get grounded citable answers.
 
 ## State
-Phase 3 (stub chat) complete. Backend streaming endpoint + frontend chat UI wired. Analyst can log in, start a new chat, send a message, and see a streaming response from Ollama. Retrieval, grounding, persistence deferred.
+Phase 4 (ingestion) complete. 25 SEC 10-K filings ingested — 22,209 chunks with 768d embeddings and full-text search vectors in Supabase. Phase 5 plan written. Ollama installed and running.
 
 ## Stack
 - **Backend:** Python 3.12+, FastAPI, Pydantic v2, PydanticAI, httpx, structlog, SQLAlchemy, Alembic, Supabase Python client, OpenAI SDK (pointed at Ollama)
@@ -70,3 +70,8 @@ Phase 3 (stub chat) complete. Backend streaming endpoint + frontend chat UI wire
 - Phase 3 frontend: `getAccessToken` exported from `supabase.ts` and shared with `http.ts`. Created `Chat.tsx` (useChat + DefaultChatTransport + auth guard), `MessageList.tsx` (bubbles, auto-scroll, empty state, streaming cursor), `ChatInput.tsx` (form + send on Enter), `Sidebar.tsx` (app branding, new chat button, sign out). Wired `/chat` route in `App.tsx`. Both `tsc --noEmit` and `pnpm build` pass clean.
 - Fixed `tsconfig.app.json` — added `ignoreDeprecations: "6.0"` for TypeScript 6 `baseUrl` deprecation in build mode.
 - Created `docs/phase-3-plan.md` and `docs/phase-3-frontend-plan.md` during planning.
+- Phase 4: installed Ollama (`ollama serve`), pulled `nomic-embed-text`. 25/25 HTML→Markdown conversion via docling + 25 `source_documents` inserted.
+- Phase 4 ingestion script: `backend/ingest/chunk_and_load.py` — converts HTML to DoclingDocument, chunks via HybridChunker (~800 chars avg), detects 10-K Item sections from document structure, embeds via Ollama `nomic-embed-text` (768d, batch 8), inserts into `document_chunks`, updates `search_vector` via `to_tsvector()`. Tested single filing (AAPL 2025, 695 chunks), then batch all 25 (22,209 total). Added `get_admin_connection()` + `execute_sql()` to `app/database/supabase.py` for raw Postgres queries.
+- Phase 4 verified: all 25 filings present in `document_chunks` with embeddings, sections, search_vector, and metadata (ticker, year, company_name via `source_documents` join).
+- Updated `todo.md` Phase 4 items to match actual implementation.
+- Updated `docs/phase-5-plan.md` incorporating hybrid search patterns from `daveebbelaar/ai-cookbook`: RRF with k=60, graceful degradation, `DocumentRetriever` designed as PydanticAI tool for Phase 6.

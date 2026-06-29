@@ -38,16 +38,13 @@
 - [x] `frontend/src/lib/supabase.ts` — export `getAccessToken` for shared use
 - [x] `frontend/tsconfig.app.json` — fix TS6 `baseUrl` deprecation for build mode
 
-## Phase 4 — Ingestion pipeline (`backend/ingest/`)
-- [ ] `backend/ingest/__init__.py` — package marker
-- [ ] `backend/ingest/extract.py` — SEC HTML → normalized Markdown (stdlib `html.parser`)
-- [ ] `backend/ingest/chunk.py` — section-aware chunking (split on 10-K Item headings, max ~500 tokens)
-- [ ] `backend/ingest/embed.py` — Ollama embeddings via OpenAI SDK (`nomic-embed-text`, 768d, batched)
-- [ ] `backend/ingest/load.py` — upsert `source_documents` + batch insert `document_chunks`, populate `search_vector` via `to_tsvector()`
-- [ ] `backend/ingest/pipeline.py` — orchestrate all 25 filings end-to-end (reads `manifest.json`)
-- [ ] `backend/tests/ingest/test_extract.py` — unit tests for HTML extraction
-- [ ] `backend/tests/ingest/test_chunk.py` — unit tests for section-aware chunking
-- [ ] Run pipeline against all 25 filings and verify DB
+## Phase 4 — Ingestion pipeline
+- [x] Install Ollama + pull `nomic-embed-text` model
+- [x] `data/convert_md.py` — batch-convert 25 SEC HTML filings to Markdown via docling
+- [x] `backend/ingest/load_source_documents.py` — read `manifest.json`, insert 25 filings into `source_documents`
+- [x] `backend/ingest/chunk_and_load.py` — docling → HybridChunker → section detection → Ollama embeddings → Supabase insert → `search_vector` update
+- [x] Test mode: `--ticker AAPL --year 2025` (695 chunks, verified end-to-end)
+- [x] Full batch: 25 filings, 22,209 chunks, all embedded + search_vector populated
 
 ## Phase 5 — Retrieval (`backend/app/retrieval/`)
 - [ ] `backend/app/retrieval/__init__.py`
