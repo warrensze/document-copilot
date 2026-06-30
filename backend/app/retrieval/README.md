@@ -23,8 +23,10 @@ flowchart LR
 
 ## Default Settings
 
+All tunable parameters live in [`app/config.py`](../config.py) — a single `pydantic-settings` class loaded from `.env`. Override any setting by adding it to `.env` (e.g. `RETRIEVAL_TOP_K=10`).
+
 | Parameter | Default | Config key | Notes |
-|---|---|---|---|
+|---|---|---|---|---|
 | `embedding_model` | `nomic-embed-text` | `embedding_model` | 768-dim embeddings via Ollama |
 | `embedding_dimensions` | 768 | `embedding_dimensions` | Must match model output |
 | `ollama_base_url` | `http://localhost:11434/v1` | `ollama_base_url` | OpenAI-compatible endpoint |
@@ -115,6 +117,25 @@ User Query: "What was Apple's revenue in 2025?"
 | `company_name` | `str` | e.g. "Apple Inc." |
 | `year` | `str` | e.g. "2025" |
 | `score` | `float` | RRF fused score (final) or raw similarity/rank (pre-fusion) |
+
+## MacBook Air (16 GB) Optimisation
+
+The pipeline is tuned for RAM-constrained laptops:
+
+| Setting | Value | Why |
+|---|---|---|
+| `llm_model` | `llama3.2:3b` | 3.2B params, Q4_K_M — ~2 GB RAM at load, stays under 8 GB during inference |
+| `embedding_model` | `nomic-embed-text` | 137M params, F16 — ~274 MB, negligible overhead |
+| `embedding_dimensions` | 768 | Standard for `nomic-embed-text`; half the size of `text-embedding-ada-002` (1536) |
+| `retrieval_inner_top_k` | 20 | Keeps per-strategy candidate pool small — no need for hundreds of results on a local corpus of 22k chunks |
+| `retrieval_top_k` | 15 | Final count delivered to the LLM — 15 passages stay within the 3B model's 4096-token context window |
+| `retrieval_rrf_k` | 60 | Standard Cormack 2009 constant; no tuning needed |
+
+**Additional tips for 16 GB host:**
+- Ollama runs entirely on CPU/Metal — no GPU memory pressure.
+- The `llama.cpp` backend uses `-c 4096` context (`num_ctx`), keeping KV-cache RAM manageable.
+- If swap pressure appears, reduce `retrieval_top_k` to 10 (less context per request).
+- The embedder runs synchronously in a thread pool (`asyncio.to_thread`) — it won't block the event loop during the ~50 ms embedding call.
 
 ## Key Files
 

@@ -63,9 +63,9 @@
 - [x] `backend/tests/assistant/test_agent.py` — unit tests (tool schema, deps construction, instructions loaded)
 
 ## Phase 7 — Grounding (`backend/app/grounding/`)
-- [ ] `backend/app/grounding/__init__.py`
-- [ ] `backend/app/grounding/validator.py` — `GroundingValidator` (checks each citation chunk_id against retrieved set)
-- [ ] `backend/tests/grounding/test_validator.py` — unit tests (valid, unretrieved citation, missing disclaimer)
+- [x] `backend/app/grounding/__init__.py`
+- [x] `backend/app/grounding/validator.py` — `GroundingValidator` (checks each citation chunk_id against retrieved set)
+- [x] `backend/tests/grounding/test_validator.py` — unit tests (valid, unretrieved citation, missing disclaimer)
 
 ## Phase 8 — Chat orchestration (`backend/app/chat/` + update `api/chat.py`)
 - [ ] `backend/app/chat/__init__.py`
