@@ -7,7 +7,8 @@ from openai import OpenAI
 
 from app.config import settings
 from app.retrieval.fusion import reciprocal_rank_fusion
-from app.retrieval.queries import SearchResult, fulltext_search, semantic_search
+from app.retrieval.queries import SearchResult, fulltext_search, refined_fulltext_search, semantic_search
+from app.retrieval.query_refinery import load_company_map, refine_query
 
 logger = logging.getLogger(__name__)
 
@@ -16,10 +17,22 @@ class DocumentRetriever:
     def __init__(self, db_url: str, ollama_client: OpenAI) -> None:
         self._db_url = db_url
         self._ollama_client = ollama_client
+        self._company_map = load_company_map(db_url)
 
     def search(self, query: str, top_k: int | None = None) -> list[SearchResult]:
         top_k = top_k or settings.retrieval_top_k
         inner_top_k = max(top_k * 2, settings.retrieval_inner_top_k)
+
+        refined = refine_query(query, company_map=self._company_map)
+        logger.debug(
+            "refined query",
+            extra={
+                "original": query,
+                "clean": refined.clean_query,
+                "tickers": refined.tickers,
+                "years": refined.years,
+            },
+        )
 
         embedding = self._embed_query(query)
 
@@ -36,7 +49,13 @@ class DocumentRetriever:
                     logger.warning("semantic search failed", exc_info=True)
 
             try:
-                fulltext_results = fulltext_search(conn, query, top_k=inner_top_k)
+                fulltext_results = refined_fulltext_search(
+                    conn,
+                    query=refined.clean_query,
+                    tickers=refined.tickers if refined.has_filters else None,
+                    years=refined.years if refined.has_filters else None,
+                    top_k=inner_top_k,
+                )
             except Exception:
                 logger.warning("full-text search failed", exc_info=True)
 

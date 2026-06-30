@@ -50,6 +50,24 @@ ORDER BY score DESC
 LIMIT %s
 """
 
+REFINED_FTS_SQL = """
+SELECT dc.id            AS chunk_id,
+       dc.chunk_text,
+       dc.section,
+       dc.document_id,
+       sd.ticker,
+       sd.company_name,
+       sd.year,
+       ts_rank(dc.search_vector, plainto_tsquery('english', %(query)s)) AS score
+FROM document_chunks dc
+JOIN source_documents sd ON dc.document_id = sd.id
+WHERE dc.search_vector @@ plainto_tsquery('english', %(query)s)
+  AND (COALESCE(%(tickers)s::text[], '{}') = '{}' OR sd.ticker = ANY(%(tickers)s))
+  AND (COALESCE(%(years)s::text[], '{}') = '{}' OR sd.year = ANY(%(years)s))
+ORDER BY score DESC
+LIMIT %(top_k)s
+"""
+
 
 def _vec_str(embedding: list[float]) -> str:
     return "[" + ",".join(str(v) for v in embedding) + "]"
@@ -73,6 +91,26 @@ def fulltext_search(
 ) -> list[SearchResult]:
     top_k = top_k or settings.retrieval_inner_top_k
     rows = conn.execute(FULLTEXT_SQL, (query, query, top_k)).fetchall()
+    return [_row_to_result(r) for r in rows]
+
+
+def refined_fulltext_search(
+    conn: Connection,
+    query: str,
+    tickers: list[str] | None = None,
+    years: list[str] | None = None,
+    top_k: int | None = None,
+) -> list[SearchResult]:
+    top_k = top_k or settings.retrieval_inner_top_k
+    rows = conn.execute(
+        REFINED_FTS_SQL,
+        {
+            "query": query,
+            "tickers": tickers or None,
+            "years": years or None,
+            "top_k": top_k,
+        },
+    ).fetchall()
     return [_row_to_result(r) for r in rows]
 
 

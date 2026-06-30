@@ -54,6 +54,19 @@
 - [x] `backend/app/retrieval/retriever.py` — `DocumentRetriever` (embed query → run both searches → fuse → return `SearchResult`s)
 - [x] `backend/tests/retrieval/test_fusion.py` — unit tests for RRF, edge cases (empty, disjoint, overlapping)
 
+## Phase 5.5 — Query refinement (`backend/app/retrieval/query_refinery.py`)
+- [x] `RefinedQuery` dataclass (tickers, years, clean_query, has_filters)
+- [x] NLTK stopword removal for noise filtering
+- [x] Domain-specific noise words (show, tell, describe, best, highest, etc.)
+- [x] Ticker pattern extraction with false-positive filtering
+- [x] Year extraction (`2024`, `FY2024`, `fiscal year 2024`)
+- [x] Company name → ticker resolution via `source_documents` DB lookup (lazy-loaded map)
+- [x] Multiple ticker support (`AAPL AND MSFT` → `IN ('AAPL', 'MSFT')`)
+- [x] `refined_fulltext_search()` in `queries.py` with optional WHERE ticker/year filters
+- [x] Wired into `DocumentRetriever.search()` — semantic leg unchanged, FTS leg uses refined query
+- [x] Graceful fallback: DB down → empty company map; NLTK data missing → bundled minimal stopwords
+- [x] `backend/tests/retrieval/test_query_refinery.py` — 12 unit tests
+
 ## Phase 6 — LLM assistant (`backend/app/assistant/`)
 - [x] `backend/app/assistant/__init__.py`
 - [x] `backend/app/assistant/outputs.py` — `GroundedAnswer`, `Citation`, `SourcePassage` Pydantic models
@@ -67,22 +80,22 @@
 - [x] `backend/app/grounding/validator.py` — `GroundingValidator` (checks each citation chunk_id against retrieved set)
 - [x] `backend/tests/grounding/test_validator.py` — unit tests (valid, unretrieved citation, missing disclaimer)
 
-## Phase 8 — Chat orchestration (`backend/app/chat/` + update `api/chat.py`)
-- [ ] `backend/app/chat/__init__.py`
-- [ ] `backend/app/chat/messages.py` — AI SDK wire format ↔ internal message conversion
-- [ ] `backend/app/chat/streaming.py` — SSE event generators (text-start/delta/end, citation event, error event)
-- [ ] `backend/app/chat/orchestrator.py` — `ChatOrchestrator.run_turn()`: retrieve → generate → ground → persist → stream
-- [ ] `backend/app/api/chat.py` — replace stub: wire `ChatOrchestrator` into `/chat/stream` endpoint
-- [ ] Persist user message, assistant `GroundedAnswer`, and citations to Supabase on success
-- [ ] Return controlled error event on grounding failure
-
-## Phase 9 — Final UI polish (frontend + backend)
-- [ ] Backend: `GET /chat/threads` — list authenticated user's threads
-- [ ] Backend: `GET /chat/{thread_id}/messages` — full message history with citations
-- [ ] `frontend/src/components/chat/CitationBadge.tsx` — inline citation reference (superscript, tooltip)
-- [ ] `frontend/src/components/chat/CitationPanel.tsx` — full citation list with expandable source passages
-- [ ] `frontend/src/components/chat/ThreadList.tsx` — thread history sidebar, click to switch threads
-- [ ] `frontend/src/components/chat/LoadingSkeleton.tsx` — placeholder animation during load
-- [ ] `frontend/src/components/chat/ErrorState.tsx` — structured error display (auth, network, grounding, generic)
-- [ ] Update `MessageList.tsx` — render citations inline + citation panel below each assistant message
-- [ ] Update `Chat.tsx` — thread switching via `key={threadId}`, load history, wire thread list
+## Phase 8+9 — Chat orchestration + UI polish
+- [x] `backend/app/chat/__init__.py` — package init
+- [x] `backend/app/chat/events.py` — SSE event builders (`status_event`, `text_start`, `text_delta`, `text_end`, `citations_event`, `error_event`)
+- [x] `backend/app/chat/persistence.py` — DB helpers: thread CRUD, message save, citation save, title generation
+- [x] `backend/app/chat/pipeline.py` — `ChatPipeline` async generator: retrieve → agent → ground → persist → stream SSE events
+- [x] `backend/app/chat/router.py` — Chat streaming + thread CRUD routes (POST `/chat/stream`, GET/POST `/chat/threads`, GET `/chat/threads/{id}/messages`, PATCH `/chat/threads/{id}`)
+- [x] Wire routes in `app/main.py`
+- [x] SS​E event types: `status`, `text-start`, `text-delta`, `text-end`, `citations`, `error`
+- [x] Pipeline stages: `retrieving` → `generating` → `grounding` → `complete`
+- [x] Persist user message, assistant answer, and citations to Supabase
+- [x] Controlled error events: retrieval failure, generation failure, grounding failure
+- [x] `frontend/src/components/chat/StatusIndicator.tsx` — pipeline stage pills (Searching → Generating → Validating) with checkmarks, active animation, fade-out on complete
+- [x] `frontend/src/components/chat/CitationBadge.tsx` — superscript `[N]` badge with hover tooltip
+- [x] `frontend/src/components/chat/CitationPanel.tsx` — expandable citation list below each assistant message
+- [x] `frontend/src/components/chat/ThreadList.tsx` — sidebar thread history, click to switch, inline rename
+- [x] Update `MessageList.tsx` — render StatusIndicator at top of streaming message, inline CitationBadge references, CitationPanel per assistant message
+- [x] Update `Sidebar.tsx` — embed ThreadList
+- [x] Update `Chat.tsx` — `useChat` with `onChunk` for pipeline status + citations, thread switching via `key={threadId}`, load thread list
+- [x] Thread title auto-generation from first user message (truncated to 50 chars)

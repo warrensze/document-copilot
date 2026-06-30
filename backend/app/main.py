@@ -3,7 +3,7 @@ from __future__ import annotations
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 
-from app.api.chat import router as chat_router
+from app.chat.router import router as chat_router
 from app.config import settings
 
 app = FastAPI(title="Document Copilot")

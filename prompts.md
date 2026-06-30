@@ -20,3 +20,18 @@
 3. **Update retrieval README** — Added config file path link and MacBook Air (16 GB) optimisation section with parameter rationale.
 4. **Create tests** — `tests/grounding/test_validator.py` with 9 tests across 4 classes: valid, unretrieved, missing fields, empty citations.
 5. **Update context files** — Updated `AGENTS.md` progress section, `todo.md` Phase 7 checkmarks, created `context.md`, appended to `prompts.md`.
+
+## Session 3
+
+1. **Plan Phase 8+9 chat orchestration** — Discussed keyword extraction (deemed unnecessary), designed SSE protocol with pipeline status events, thread CRUD, citation rendering, StatusIndicator component.
+2. **Implement backbone** — Created `app/chat/events.py` (SSE builders), `app/chat/persistence.py` (DB ops), `app/chat/pipeline.py` (retrieve→agent→ground→persist→stream), `app/chat/router.py` (routes), rewired `app/main.py`.
+3. **Frontend chat components** — StatusIndicator (pipeline pills with checkmarks/active/done states), CitationBadge (superscript tooltip), CitationPanel (expandable citations with excerpt previews), ThreadList (sidebar with click-switch + inline rename).
+
+## Session 4
+
+1. **Revisit keyword extraction** — Re-analyzed the gap: FTS `plainto_tsquery` AND-s all non-stopwords including noise (show, tell, face). Real improvement comes from entity extraction (ticker → exact column filter, year → exact column filter), not from a third search leg.
+2. **Plan query refinery** — Designed `query_refinery.py` with `RefinedQuery` dataclass, NLTK stopwords + domain noise words, ticker/year entity extraction, company name→ticker resolution via `source_documents` DB lookup, `refined_fulltext_search()` with optional `IN` filters.
+3. **Implement query refinery** — Created `query_refinery.py`, modified `queries.py` (added `REFINED_FTS_SQL` + `refined_fulltext_search()`), modified `retriever.py` (wired `refine_query()` into `search()`). NLTK `stopwords` corpus for clean stopword removal without messy inline lists. Graceful fallbacks for missing NLTK data and DB connection failures.
+4. **Tests** — `tests/retrieval/test_query_refinery.py` with 12 tests covering company→ticker, ticker pattern, false positives, year formats, multi-entity, noise filtering, all-noise fallback, unknown company.
+4. **Update existing components** — MessageList renders StatusIndicator + CitationBadge + CitationPanel; Sidebar embeds ThreadList; Chat.tsx uses `useChat` with `onChunk` for pipeline status + structured citations, thread loading/switching.
+5. **Tests** — `tests/chat/test_events.py` (SSE event format, edge cases).

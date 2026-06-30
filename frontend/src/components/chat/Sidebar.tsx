@@ -1,11 +1,15 @@
 import { Button } from "@/components/ui/button"
+import ThreadList from "@/components/chat/ThreadList"
 import { supabase } from "@/lib/supabase"
 
 interface SidebarProps {
+  activeThreadId: string
   onNewChat: () => void
+  onSelectThread: (id: string) => void
+  refreshKey: number
 }
 
-export default function Sidebar({ onNewChat }: SidebarProps) {
+export default function Sidebar({ activeThreadId, onNewChat, onSelectThread, refreshKey }: SidebarProps) {
   return (
     <aside className="w-60 border-r flex flex-col bg-muted/30">
       <div className="p-4 border-b">
@@ -24,7 +28,13 @@ export default function Sidebar({ onNewChat }: SidebarProps) {
         </Button>
       </div>
 
-      <div className="flex-1" />
+      <div className="flex-1 overflow-y-auto px-2">
+        <ThreadList
+          activeThreadId={activeThreadId}
+          onSelectThread={onSelectThread}
+          refreshKey={refreshKey}
+        />
+      </div>
 
       <div className="p-3 border-t">
         <Button
