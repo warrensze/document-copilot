@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import time
 from collections.abc import AsyncIterator
 
 import structlog
@@ -28,6 +29,9 @@ async def chat_pipeline(
     assistant_msg_id: str | None = None
     answer: GroundedAnswer | None = None
     validation = None
+    _start = time.perf_counter()
+
+    logger.info("pipeline_start", thread_id=deps.thread_id, message=user_message[:200])
 
     try:
         # ---- persist user message ----
@@ -78,7 +82,16 @@ async def chat_pipeline(
         yield text_end(assistant_msg_id)
         yield status_event("complete", "")
 
+        _elapsed = time.perf_counter() - _start
+        logger.info(
+            "pipeline_complete",
+            thread_id=deps.thread_id,
+            elapsed_s=round(_elapsed, 2),
+            citations=len(validation.citations),
+        )
+
     except Exception:
-        logger.exception("pipeline_crash", thread_id=deps.thread_id)
+        _elapsed = time.perf_counter() - _start
+        logger.exception("pipeline_crash", thread_id=deps.thread_id, elapsed_s=round(_elapsed, 2))
         yield error_event("An unexpected error occurred.")
         return

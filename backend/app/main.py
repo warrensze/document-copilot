@@ -1,10 +1,9 @@
 from __future__ import annotations
 
 import logging
-import time
 
 import structlog
-from fastapi import FastAPI, Request
+from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 
 from app.chat.router import router as chat_router
@@ -36,8 +35,6 @@ logging.basicConfig(
     level=getattr(logging, settings.log_level.upper(), logging.DEBUG),
 )
 
-logger = structlog.get_logger()
-
 # ---- app ----
 app = FastAPI(title="Document Copilot")
 
@@ -51,23 +48,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-
-@app.middleware("http")
-async def log_requests(request: Request, call_next):
-    start = time.perf_counter()
-    response = await call_next(request)
-    elapsed_ms = int((time.perf_counter() - start) * 1000)
-    if request.url.path != "/health":
-        logger.info(
-            "request",
-            method=request.method,
-            path=request.url.path,
-            status=response.status_code,
-            elapsed_ms=elapsed_ms,
-        )
-    return response
-
 
 app.include_router(chat_router)
 

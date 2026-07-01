@@ -24,7 +24,7 @@ class Settings(BaseSettings):
     allowed_origins: str = "http://localhost:5173"
 
     # --- Logging ---
-    log_level: str = "DEBUG"
+    log_level: str = "INFO"
 
 
 settings = Settings()

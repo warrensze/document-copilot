@@ -24,15 +24,6 @@ class DocumentRetriever:
         inner_top_k = max(top_k * 2, settings.retrieval_inner_top_k)
 
         refined = refine_query(query, company_map=self._company_map)
-        logger.debug(
-            "refined query",
-            extra={
-                "original": query,
-                "clean": refined.clean_query,
-                "tickers": refined.tickers,
-                "years": refined.years,
-            },
-        )
 
         embedding = self._embed_query(query)
 
@@ -63,12 +54,14 @@ class DocumentRetriever:
             return []
 
         if semantic_results is None:
-            return list(fulltext_results)[:top_k]
+            results = list(fulltext_results)[:top_k]
+        elif fulltext_results is None:
+            results = list(semantic_results)[:top_k]
+        else:
+            results = reciprocal_rank_fusion(semantic_results, fulltext_results, top_k=top_k)
 
-        if fulltext_results is None:
-            return list(semantic_results)[:top_k]
-
-        return reciprocal_rank_fusion(semantic_results, fulltext_results, top_k=top_k)
+        logger.info("search", query=query, tickers=refined.tickers, results=len(results))
+        return results
 
     def _embed_query(self, query: str) -> list[float] | None:
         try:
