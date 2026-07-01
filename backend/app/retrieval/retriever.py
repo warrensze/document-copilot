@@ -53,6 +53,14 @@ class DocumentRetriever:
         if semantic_results is None and fulltext_results is None:
             return []
 
+        if semantic_results and semantic_results[0].score < settings.semantic_relevance_threshold:
+            logger.info(
+                "search_below_threshold",
+                query=query,
+                top_score=round(semantic_results[0].score, 3),
+            )
+            return []
+
         if semantic_results is None:
             results = list(fulltext_results)[:top_k]
         elif fulltext_results is None:

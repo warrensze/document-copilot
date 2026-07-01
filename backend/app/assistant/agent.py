@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import asyncio
-import re
 from dataclasses import replace
 from pathlib import Path
 
@@ -13,7 +12,6 @@ from pydantic_ai.providers.ollama import OllamaProvider
 from app.assistant.deps import DocumentAgentDeps
 from app.assistant.outputs import GroundedAnswer
 from app.config import settings
-from app.retrieval.query_refinery import load_company_map
 
 logger = structlog.get_logger(__name__)
 
@@ -39,52 +37,6 @@ agent: Agent[DocumentAgentDeps, GroundedAnswer] = Agent(
     retries=2,
 )
 
-# --- Filing signal pre-check for search_filings tool ---
-
-_FILING_KEYWORDS: frozenset[str] = frozenset({
-    "revenue", "profit", "loss", "income", "expense", "asset", "liability",
-    "equity", "debt", "dividend",
-    "risk", "management", "segment", "operation",
-    "balance", "statement", "10k", "10q", "annual", "fiscal",
-    "margin", "growth", "ebitda", "earnings", "guidance",
-    "audit", "accounting", "tax", "outlook", "forecast",
-    "stock", "share", "employee", "customer",
-})
-
-_YEAR_PATTERN = re.compile(r"\b20\d{2}\b")
-
-
-def _has_filing_signal(query: str) -> bool:
-    lower = query.lower()
-
-    if _YEAR_PATTERN.search(query):
-        return True
-
-    cmap = load_company_map(settings.database_url)
-    for name in cmap:
-        if name in lower:
-            return True
-
-    if any(kw in lower for kw in _FILING_KEYWORDS):
-        return True
-
-    return False
-
-
-def _available_companies_message() -> str:
-    cmap = load_company_map(settings.database_url)
-    tickers = sorted(set(cmap.values()))
-    if not tickers:
-        return (
-            "No companies are available in the SEC filing database. "
-            "I can only answer questions based on what has been ingested."
-        )
-    return (
-        f"I can search SEC 10-K filings for these companies: "
-        f"{', '.join(tickers)}. "
-        "Ask about a specific company, year, or financial topic."
-    )
-
 
 @agent.tool
 async def search_filings(
@@ -92,9 +44,6 @@ async def search_filings(
     query: str,
     top_k: int = 10,
 ) -> str:
-    if not _has_filing_signal(query):
-        return _available_companies_message()
-
     results = await asyncio.to_thread(ctx.deps.retriever.search, query, top_k)
 
     ctx.deps.retrieved_chunk_ids.update({r.chunk_id for r in results})

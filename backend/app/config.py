@@ -12,7 +12,7 @@ class Settings(BaseSettings):
     database_url: str
 
     ollama_base_url: str = "http://localhost:11434/v1"
-    llm_model: str = "llama3.2:3b"
+    llm_model: str = "qwen2.5:1.5b"
     embedding_model: str = "nomic-embed-text"
     embedding_dimensions: int = 768
 
@@ -20,6 +20,7 @@ class Settings(BaseSettings):
     retrieval_top_k: int = 15
     retrieval_inner_top_k: int = 20
     retrieval_rrf_k: int = 60
+    semantic_relevance_threshold: float = 0.50
 
     allowed_origins: str = "http://localhost:5173"
 
