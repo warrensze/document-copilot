@@ -114,8 +114,8 @@ export default function MessageList({ messages, status, pipelineStatus, errorMes
       })}
       {status === "submitted" && (
         <div className="flex justify-start">
-          <div className="bg-muted text-muted-foreground rounded-lg px-4 py-2">
-            <span className="animate-pulse">▊</span>
+          <div className="bg-muted rounded-lg px-4 py-2 max-w-[80%]">
+            <StatusIndicator stages={pipelineToStages(pipelineStatus)} className="border-0 p-0" />
           </div>
         </div>
       )}

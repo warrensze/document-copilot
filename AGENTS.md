@@ -2,6 +2,21 @@
 
 This file is the source of truth for any coding agent (Claude Code, Cursor, Codex, etc.) working in this repo. Read it before touching code.
 
+## SSE Status Events (frontend status indicator)
+
+The `StatusIndicator` shows stages: **Searching → Generating → Validating**.
+
+| SSE `type` | `status` value | Stage transition |
+|---|---|---|
+| `data-status` | `retrieving` | Searching → active |
+| `data-status` | `generating` | Searching → done, Generating → active |
+| `data-status` | `grounding` | Generating → done, Grounding → active |
+| `data-status` | `grounding_failed` | Grounding → failed |
+| `data-status` | `complete` | Grounding → done (component hides when all done) |
+| `data-error` | — | Resets all to waiting |
+
+Emitted from `pipeline.py` in order: retrieving → generating → (agent runs, may call `search_filings`) → grounding → complete.
+
 ## Stack
 
 - **Backend:** Python + FastAPI
@@ -55,6 +70,29 @@ Per-stack specifics live in `backend/AGENTS.md` and `frontend/AGENTS.md`.
 A single settings module is the source of truth for environment per service (`backend/app/config.py`, `frontend/lib/env.ts`). Do not call `os.getenv` / read `process.env` directly in app code. Do not call `load_dotenv` anywhere. If a third-party SDK reads env vars directly, mirror them in the settings module — don't sprinkle `setdefault` elsewhere.
 
 Fail fast on startup if required config is missing. No silent fallbacks that hide real config errors.
+
+## SSE Status Events (frontend status indicator)
+
+`StatusIndicator` shows stages: **Searching → Generating → Validating**.
+
+| SSE `type` | `status` value | Frontend transition |
+|---|---|---|
+| `data-status` | `retrieving` | Searching → active |
+| `data-status` | `generating` | Searching → done, Generating → active |
+| `data-status` | `grounding` | Generating → done, Grounding → active |
+| `data-status` | `grounding_failed` | Grounding → failed |
+| `data-status` | `complete` | Grounding → done (component hides) |
+| `data-error` | — | Resets all to waiting |
+
+Emitted from `pipeline.py` in order: retrieving → generating → (agent runs) → grounding → complete.
+
+"submitted" state (before first SSE event) renders StatusIndicator with all stages waiting.
+
+## Key Fixes / Known Issues
+
+- **"SEC" in `_TICKER_FALSE_POSITIVES`** (`backend/app/retrieval/query_refinery.py:91`): Prevents `refine_query` from extracting "SEC" as a stock ticker when the model searches for "SEC filing analysis" on non-filing questions.
+- **Instructions explicitly list skip-search categories** (`backend/app/assistant/instructions.md:5-9`): "Do NOT search for these kinds of questions — just respond naturally" — identity, greetings, general knowledge, system questions.
+- **Rule #8 — no fabricated citations** (`instructions.md:20`): "If you do not have valid, non-empty citation data, output 'citations': []".
 
 ## Code style (universal)
 

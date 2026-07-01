@@ -37,6 +37,9 @@ async def chat_pipeline(
         title = auto_title(user_message)
         set_thread_title(deps.thread_id, title)
 
+        # ---- retrieve ----
+        yield status_event("retrieving", "Searching SEC filings...")
+
         # ---- generate ----
         yield status_event("generating", "Generating answer with citations...")
         try:

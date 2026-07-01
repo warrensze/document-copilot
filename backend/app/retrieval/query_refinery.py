@@ -88,6 +88,7 @@ _TICKER_FALSE_POSITIVES: frozenset[str] = frozenset({
     "NOW", "PER", "GET", "SEE", "USE", "WAY", "WAS", "WHO", "WHY", "MAY",
     "INC", "LTD", "CORP", "LLC", "GPS", "USA", "CEO", "CFO", "SMB",
     "FAQ", "ETA", "FYI", "ASAP", "ROI", "KPI",
+    "SEC",
 })
 
 _YEAR_PATTERN = re.compile(r"\b(?:FY\s*)?(20\d{2})\b", re.IGNORECASE)

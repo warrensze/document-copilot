@@ -56,7 +56,10 @@ export default function ChatPage() {
         const s = (chunk.data as Record<string, unknown>).status as string
         setPipelineStatus((prev) => {
           const next = { ...prev }
-          if (s === "generating") {
+          if (s === "retrieving") {
+            next.retrieving = "active"
+          } else if (s === "generating") {
+            next.retrieving = "done"
             next.generating = "active"
           } else if (s === "grounding") {
             next.generating = "done"

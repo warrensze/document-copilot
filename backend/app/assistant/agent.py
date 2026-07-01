@@ -4,6 +4,7 @@ import asyncio
 from dataclasses import replace
 from pathlib import Path
 
+import structlog
 from pydantic_ai import Agent, RunContext
 from pydantic_ai.models.openai import OpenAIChatModel
 from pydantic_ai.providers.ollama import OllamaProvider
@@ -11,6 +12,8 @@ from pydantic_ai.providers.ollama import OllamaProvider
 from app.assistant.deps import DocumentAgentDeps
 from app.assistant.outputs import GroundedAnswer
 from app.config import settings
+
+logger = structlog.get_logger(__name__)
 
 _instructions = (Path(__file__).parent / "instructions.md").read_text()
 
@@ -62,5 +65,16 @@ async def search_filings(
 
 
 async def run_agent(deps: DocumentAgentDeps, user_message: str) -> GroundedAnswer:
-    result = await agent.run(user_message, deps=deps)
-    return result.output
+    try:
+        result = await agent.run(user_message, deps=deps)
+        return result.output
+    except Exception:
+        logger.exception("agent_run_failed", thread_id=deps.thread_id)
+        return GroundedAnswer(
+            answer=(
+                "I encountered an issue processing your request. "
+                "My expertise is limited to SEC filing analysis. "
+                "Please try asking about a specific company's SEC 10-K filing."
+            ),
+            citations=[],
+        )

@@ -26,7 +26,7 @@ class TestInstructions:
 
     def test_contains_grounding_rules(self) -> None:
         text = self.path.read_text()
-        assert "answer only from" in text.lower()
+        assert "search tool" in text.lower()
         assert "Cite every factual claim" in text
         assert "stock recommendations" in text
 
