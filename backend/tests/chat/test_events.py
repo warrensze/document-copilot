@@ -22,12 +22,12 @@ def _parse_data(line: str) -> dict:
 
 class TestStatusEvent:
     def test_basic(self) -> None:
-        out = status_event("retrieving", "Searching...")
+        out = status_event("generating", "Generating answer...")
         data = _parse_data(out)
-        assert data["type"] == "data"
-        assert data["data"]["event"] == "status"
-        assert data["data"]["status"] == "retrieving"
-        assert data["data"]["detail"] == "Searching..."
+        assert data["type"] == "data-status"
+        assert data["transient"] is True
+        assert data["data"]["status"] == "generating"
+        assert data["data"]["detail"] == "Generating answer..."
 
     def test_empty_detail(self) -> None:
         out = status_event("complete")
@@ -63,15 +63,15 @@ class TestCitationsEvent:
         ]
         out = citations_event(citations, message_id="msg-1")
         data = _parse_data(out)
-        assert data["type"] == "data"
-        assert data["data"]["event"] == "citations"
+        assert data["type"] == "data-citations"
+        assert data["transient"] is True
         assert data["data"]["citations"] == citations
-        assert data["data"]["id"] == "msg-1"
+        assert data["id"] == "msg-1"
 
     def test_without_message_id(self) -> None:
         out = citations_event([])
         data = _parse_data(out)
-        assert "id" not in data["data"]
+        assert "id" not in data
 
     def test_multiple_citations(self) -> None:
         citations = [
@@ -87,10 +87,11 @@ class TestErrorEvent:
     def test_basic(self) -> None:
         out = error_event("Something went wrong")
         data = _parse_data(out)
-        assert data["type"] == "error"
-        assert data["errorText"] == "Something went wrong"
+        assert data["type"] == "data-error"
+        assert data["transient"] is True
+        assert data["data"]["errorText"] == "Something went wrong"
 
     def test_empty_message(self) -> None:
         out = error_event("")
         data = _parse_data(out)
-        assert data["errorText"] == ""
+        assert data["data"]["errorText"] == ""

@@ -43,6 +43,8 @@ async def search_filings(
 ) -> str:
     results = await asyncio.to_thread(ctx.deps.retriever.search, query, top_k)
 
+    ctx.deps.retrieved_chunk_ids.update({r.chunk_id for r in results})
+
     if not results:
         return "No relevant passages found in the SEC filing corpus."
 

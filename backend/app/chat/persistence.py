@@ -3,6 +3,7 @@ from __future__ import annotations
 import uuid
 
 import psycopg
+from psycopg.types.json import Jsonb
 
 from app.assistant.outputs import Citation
 from app.config import settings
@@ -67,7 +68,7 @@ def save_assistant_message(
     with _get_conn() as conn:
         conn.execute(
             "INSERT INTO chat_messages (id, thread_id, role, content, meta) VALUES (%s, %s, 'assistant', %s, %s)",
-            (msg_id, thread_id, content, meta or {}),
+            (msg_id, thread_id, content, Jsonb(meta or {})),
         )
         for c in citations:
             conn.execute(
@@ -147,6 +148,31 @@ def get_thread_messages(thread_id: str, owner_id: str) -> list[dict] | None:
                 ]
             messages.append(msg)
         return messages
+
+
+def delete_thread(thread_id: str, owner_id: str) -> bool:
+    with _get_conn() as conn:
+        thread = conn.execute(
+            "SELECT id FROM chat_threads WHERE id = %s AND owner_id = %s",
+            (thread_id, owner_id),
+        ).fetchone()
+        if not thread:
+            return False
+
+        conn.execute(
+            "DELETE FROM message_citations WHERE message_id IN (SELECT id FROM chat_messages WHERE thread_id = %s)",
+            (thread_id,),
+        )
+        conn.execute(
+            "DELETE FROM chat_messages WHERE thread_id = %s",
+            (thread_id,),
+        )
+        conn.execute(
+            "DELETE FROM chat_threads WHERE id = %s AND owner_id = %s",
+            (thread_id, owner_id),
+        )
+        conn.commit()
+        return True
 
 
 def auto_title(user_message: str) -> str:

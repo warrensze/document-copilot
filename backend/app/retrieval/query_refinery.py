@@ -1,12 +1,13 @@
 from __future__ import annotations
 
-import logging
 import re
 from dataclasses import dataclass, field
 
+import structlog
+
 import psycopg
 
-logger = logging.getLogger(__name__)
+logger = structlog.get_logger(__name__)
 
 # --- NLTK stopwords (lazy-loaded) ---
 

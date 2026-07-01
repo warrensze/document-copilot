@@ -1,14 +1,11 @@
 from __future__ import annotations
 
-import asyncio
-import logging
 from collections.abc import AsyncIterator
 
-from psycopg import DatabaseError
+import structlog
 
 from app.assistant.agent import run_agent
 from app.assistant.deps import DocumentAgentDeps
-from app.assistant.outputs import Citation, GroundedAnswer
 from app.chat.events import (
     citations_event,
     error_event,
@@ -20,7 +17,7 @@ from app.chat.events import (
 from app.chat.persistence import auto_title, save_assistant_message, save_user_message, set_thread_title
 from app.grounding.validator import GroundingValidator
 
-logger = logging.getLogger(__name__)
+logger = structlog.get_logger(__name__)
 
 
 async def chat_pipeline(
@@ -40,36 +37,22 @@ async def chat_pipeline(
         title = auto_title(user_message)
         set_thread_title(deps.thread_id, title)
 
-        # ---- retrieve ----
-        yield status_event("retrieving", "Searching 22,209 filing chunks...")
-        try:
-            results = await asyncio.to_thread(deps.retriever.search, user_message)
-        except DatabaseError:
-            logger.exception("retrieval query failed")
-            yield error_event("Search failed. Please try again.")
-            return
-        except Exception:
-            logger.exception("retrieval failed")
-            results = []
-
-        chunk_ids = {r.chunk_id for r in results}
-
         # ---- generate ----
         yield status_event("generating", "Generating answer with citations...")
         try:
             answer = await run_agent(deps, user_message)
         except Exception:
-            logger.exception("agent generation failed")
+            logger.exception("agent_generation_failed", thread_id=deps.thread_id)
             yield error_event("Failed to generate an answer. Please try again.")
             return
 
         # ---- validate ----
         yield status_event("grounding", "Validating citations...")
-        validator = GroundingValidator(retrieved_chunk_ids=chunk_ids)
+        validator = GroundingValidator(retrieved_chunk_ids=deps.retrieved_chunk_ids)
         validation = validator.validate(answer)
 
         if not validation.passed:
-            logger.warning("grounding failed", extra={"errors": validation.errors})
+            logger.warning("grounding_failed", thread_id=deps.thread_id, errors=validation.errors)
             yield status_event("grounding_failed", "; ".join(validation.errors))
 
         # ---- stream answer ----
@@ -93,6 +76,6 @@ async def chat_pipeline(
         yield status_event("complete", "")
 
     except Exception:
-        logger.exception("unhandled pipeline error")
+        logger.exception("pipeline_crash", thread_id=deps.thread_id)
         yield error_event("An unexpected error occurred.")
         return

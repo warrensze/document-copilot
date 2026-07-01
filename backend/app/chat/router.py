@@ -2,8 +2,7 @@ from __future__ import annotations
 
 import uuid
 
-import uuid
-
+import structlog
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import StreamingResponse
 from openai import OpenAI
@@ -13,6 +12,7 @@ from app.assistant.deps import DocumentAgentDeps
 from app.auth.dependencies import get_current_user
 from app.chat.pipeline import chat_pipeline
 from app.chat.persistence import (
+    delete_thread,
     get_or_create_thread,
     get_thread_messages,
     list_threads,
@@ -20,6 +20,8 @@ from app.chat.persistence import (
 )
 from app.config import settings
 from app.retrieval.retriever import DocumentRetriever
+
+logger = structlog.get_logger(__name__)
 
 router = APIRouter(prefix="/chat")
 
@@ -74,9 +76,16 @@ async def chat_stream(
         retriever=retriever,
     )
 
+    logger.info("stream_start", user_id=owner_id, thread_id=thread_id, message=last_user_msg.content[:100])
+
     async def event_stream():
-        async for event in chat_pipeline(deps, last_user_msg.content, user_message_id):
-            yield event
+        try:
+            async for event in chat_pipeline(deps, last_user_msg.content, user_message_id):
+                yield event
+        except GeneratorExit:
+            logger.info("stream_disconnected", thread_id=thread_id, user_id=owner_id)
+        except Exception:
+            logger.exception("stream_crash", thread_id=thread_id, user_id=owner_id)
 
     return StreamingResponse(event_stream(), media_type="text/event-stream")
 
@@ -111,4 +120,16 @@ async def rename_thread(
     user: dict = Depends(get_current_user),
 ):
     set_thread_title(thread_id, body.title)
+    return {"ok": True}
+
+
+@router.delete("/threads/{thread_id}")
+async def delete_user_thread(
+    thread_id: str,
+    user: dict = Depends(get_current_user),
+):
+    deleted = delete_thread(thread_id, user["id"])
+    if not deleted:
+        raise HTTPException(status_code=404, detail="Thread not found")
+    logger.info("thread_deleted", thread_id=thread_id, user_id=user["id"])
     return {"ok": True}

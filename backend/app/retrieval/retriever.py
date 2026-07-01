@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import logging
+import structlog
 
 import psycopg
 from openai import OpenAI
@@ -10,7 +10,7 @@ from app.retrieval.fusion import reciprocal_rank_fusion
 from app.retrieval.queries import SearchResult, fulltext_search, refined_fulltext_search, semantic_search
 from app.retrieval.query_refinery import load_company_map, refine_query
 
-logger = logging.getLogger(__name__)
+logger = structlog.get_logger(__name__)
 
 
 class DocumentRetriever:

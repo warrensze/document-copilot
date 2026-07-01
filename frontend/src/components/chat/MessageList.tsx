@@ -26,6 +26,7 @@ interface MessageListProps {
   messages: UIMessage[]
   status: "ready" | "streaming" | "submitted" | "error"
   pipelineStatus: PipelineState
+  errorMessage?: string | null
 }
 
 const pipelineToStages = (p: PipelineState): Stage[] => [
@@ -52,7 +53,7 @@ function inlineCitations(text: string, citations: AssistantMeta["citations"]) {
   })
 }
 
-export default function MessageList({ messages, status, pipelineStatus }: MessageListProps) {
+export default function MessageList({ messages, status, pipelineStatus, errorMessage }: MessageListProps) {
   const bottomRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -73,6 +74,11 @@ export default function MessageList({ messages, status, pipelineStatus }: Messag
 
   return (
     <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      {errorMessage && (
+        <div className="bg-destructive/10 text-destructive rounded-lg px-4 py-3 text-sm">
+          {errorMessage}
+        </div>
+      )}
       {messages.map((message) => {
         const isUser = message.role === "user"
         const text = message.parts

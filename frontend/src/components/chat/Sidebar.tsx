@@ -6,10 +6,11 @@ interface SidebarProps {
   activeThreadId: string
   onNewChat: () => void
   onSelectThread: (id: string) => void
+  onDeleteThread: (id: string) => void
   refreshKey: number
 }
 
-export default function Sidebar({ activeThreadId, onNewChat, onSelectThread, refreshKey }: SidebarProps) {
+export default function Sidebar({ activeThreadId, onNewChat, onSelectThread, onDeleteThread, refreshKey }: SidebarProps) {
   return (
     <aside className="w-60 border-r flex flex-col bg-muted/30">
       <div className="p-4 border-b">
@@ -32,6 +33,7 @@ export default function Sidebar({ activeThreadId, onNewChat, onSelectThread, ref
         <ThreadList
           activeThreadId={activeThreadId}
           onSelectThread={onSelectThread}
+          onDeleteThread={onDeleteThread}
           refreshKey={refreshKey}
         />
       </div>

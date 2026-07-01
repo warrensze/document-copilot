@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import json
-import uuid
 
 
 def _json(data: dict) -> str:
@@ -10,8 +9,9 @@ def _json(data: dict) -> str:
 
 def status_event(status: str, detail: str = "") -> str:
     return _json({
-        "type": "data",
-        "data": {"event": "status", "status": status, "detail": detail},
+        "type": "data-status",
+        "data": {"status": status, "detail": detail},
+        "transient": True,
     })
 
 
@@ -31,11 +31,19 @@ def citations_event(
     citations: list[dict],
     message_id: str | None = None,
 ) -> str:
-    payload: dict = {"type": "data", "data": {"event": "citations", "citations": citations}}
+    payload: dict = {
+        "type": "data-citations",
+        "data": {"citations": citations},
+        "transient": True,
+    }
     if message_id:
-        payload["data"]["id"] = message_id
+        payload["id"] = message_id
     return _json(payload)
 
 
 def error_event(error_text: str) -> str:
-    return _json({"type": "error", "errorText": error_text})
+    return _json({
+        "type": "data-error",
+        "data": {"errorText": error_text},
+        "transient": True,
+    })
